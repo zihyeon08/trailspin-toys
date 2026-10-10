@@ -52,6 +52,12 @@ const GROUNDING_NOTE =
     'There are no funding totals, backer counts, player counts, pledge tiers, prices, or release dates in this dataset — ' +
     'do not state any such figures.';
 
+/**
+ * Turn a single data-access `Game` into its catalog export shape.
+ *
+ * @param game - Game as returned by `src/lib/games.ts`.
+ * @returns The flattened catalog entry for the export document.
+ */
 function mapCatalogGame(game: Game): CatalogGame {
     return {
         id: game.id,
@@ -69,6 +75,9 @@ function mapCatalogGame(game: Game): CatalogGame {
  * export is byte-identical across environments regardless of the runtime's
  * default locale/ICU data. This is a deterministic order, not a linguistic
  * alphabetical one (e.g. uppercase sorts before lowercase).
+ *
+ * @param values - Values to deduplicate and sort.
+ * @returns Distinct values in ordinal sort order.
  */
 function distinctSorted(values: string[]): string[] {
     return [...new Set(values)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
@@ -81,6 +90,9 @@ function distinctSorted(values: string[]): string[] {
  * Games are sorted by title using ordinal (UTF-16 code unit) comparison, with
  * `id` as a tiebreaker for duplicate titles — not locale-aware alphabetical
  * order — so the export is byte-identical across environments.
+ *
+ * @param games - All games as returned by `getAllGames`.
+ * @returns The complete, deterministically ordered catalog export document.
  */
 export function toCatalogExport(games: Game[]): CatalogExport {
     const entries = games
@@ -97,12 +109,23 @@ export function toCatalogExport(games: Game[]): CatalogExport {
     };
 }
 
-/** Serialize the export with stable formatting and a trailing newline. */
+/**
+ * Serialize the export with stable formatting and a trailing newline.
+ *
+ * @param exported - Catalog export document produced by {@link toCatalogExport}.
+ * @returns Pretty-printed JSON text, terminated with a single trailing newline.
+ */
 export function serializeCatalogExport(exported: CatalogExport): string {
     return `${JSON.stringify(exported, null, 2)}\n`;
 }
 
-/** Read the seeded database and write the grounding file to disk. */
+/**
+ * Read the seeded database and write the grounding file to disk.
+ *
+ * @param db - Injectable database client (real or in-memory test client).
+ * @param outputPath - Destination file path; defaults to {@link CATALOG_EXPORT_PATH}.
+ * @returns The catalog export document that was written to disk.
+ */
 export async function writeCatalogExport(db: Database, outputPath: string = CATALOG_EXPORT_PATH): Promise<CatalogExport> {
     const exported = toCatalogExport(await getAllGames(db));
     mkdirSync(dirname(outputPath), { recursive: true });
