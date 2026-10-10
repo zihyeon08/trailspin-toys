@@ -16,6 +16,14 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Insert any category names that don't yet exist, returning a lookup of all
+ * requested names to their row ids.
+ *
+ * @param db - Injectable database client.
+ * @param names - Distinct category names to ensure exist.
+ * @returns Map of category name to its database id.
+ */
 async function upsertCategories(db: Database, names: string[]): Promise<Map<string, number>> {
     const map = new Map<string, number>();
     for (const name of names) {
@@ -33,6 +41,14 @@ async function upsertCategories(db: Database, names: string[]): Promise<Map<stri
     return map;
 }
 
+/**
+ * Insert any publisher names that don't yet exist, returning a lookup of all
+ * requested names to their row ids.
+ *
+ * @param db - Injectable database client.
+ * @param names - Distinct publisher names to ensure exist.
+ * @returns Map of publisher name to its database id.
+ */
 async function upsertPublishers(db: Database, names: string[]): Promise<Map<string, number>> {
     const map = new Map<string, number>();
     for (const name of names) {
@@ -50,7 +66,13 @@ async function upsertPublishers(db: Database, names: string[]): Promise<Map<stri
     return map;
 }
 
-/** Seed the database from the games CSV. Idempotent: skips existing games by title. */
+/**
+ * Seed the database from the games CSV. Idempotent: skips existing games by title.
+ *
+ * @param db - Injectable database client.
+ * @param csvPath - Path to the seed CSV file; defaults to `db/games.csv`.
+ * @returns Resolves once all missing categories, publishers, and games are inserted.
+ */
 export async function seedDatabase(db: Database, csvPath: string = join(here, 'games.csv')): Promise<void> {
     const rows = parseGamesCsv(readFileSync(csvPath, 'utf-8'));
 

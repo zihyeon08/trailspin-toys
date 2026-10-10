@@ -8,6 +8,9 @@
 
 /**
  * Clamps a rating into the displayable 0–5 range.
+ *
+ * @param rating - Raw rating value, potentially outside the 0–5 range.
+ * @returns The rating clamped to the inclusive [0, 5] range.
  */
 export function clampRating(rating: number): number {
     return Math.min(5, Math.max(0, rating));
@@ -19,6 +22,9 @@ export function clampRating(rating: number): number {
  * Renders full (★), an optional half (½) and empty (☆) stars. Returns
  * `'Not yet rated'` when the rating is `null`. Ratings are clamped to the
  * 0–5 range so the output always contains exactly five star positions.
+ *
+ * @param rating - Star rating in [0, 5], or `null` when the game is unrated.
+ * @returns A glyph string representing the rating, or `'Not yet rated'`.
  */
 export function formatStarRating(rating: number | null): string {
     if (rating === null) return 'Not yet rated';
